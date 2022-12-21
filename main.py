@@ -1,10 +1,8 @@
 import os
 import discord
-
-from dotenv import load_dotenv
-
 from commands import run_command
 
+from dotenv import load_dotenv
 load_dotenv()
 
 ALLOWED_CHANNELS = [

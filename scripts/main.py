@@ -2,8 +2,9 @@ import os
 import discord
 from commands import run_command
 
-from dotenv import load_dotenv
-load_dotenv()
+if os.getenv('DEVELOPMENT'):
+    from dotenv import load_dotenv
+    load_dotenv()
 
 ALLOWED_CHANNELS = [
     'second-channel'

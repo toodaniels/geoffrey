@@ -3,7 +3,7 @@ import boto3
 
 
 @dataclass
-class EC2:
+class EC2Instance:
     instance_id: str
     ec2 = boto3.client('ec2', region_name='us-east-1')
 
@@ -21,3 +21,15 @@ class EC2:
     def stop_instance(self):
         print('Stopping instance', self.instance_id)
         self.ec2.stop_instances(InstanceIds=[self.instance_id])
+
+
+@dataclass
+class EC2Helper:
+    ec2 = boto3.client('ec2', region_name='us-east-1')
+
+    @classmethod
+    def get_instances(self):
+        response = self.ec2.describe_instances()
+        instances = response.get('Reservations').pop().get('Instances')
+
+        return instances

@@ -6,7 +6,7 @@ authors = ["Daniel Torres <torresestradadaniel@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 discord = "^2.1.0"
 asyncio = "^3.4.3"
 python-dotenv = "^0.21.0"
@@ -16,6 +16,10 @@ boto3 = "^1.26.34"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.0.0"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.2.0"
 
 [build-system]
 requires = ["poetry-core"]

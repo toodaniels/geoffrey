@@ -2,7 +2,7 @@ import os
 from dataclasses import dataclass
 from discord import channel
 from time import sleep
-from aws import EC2
+from aws import EC2Instance
 
 
 @dataclass
@@ -35,7 +35,7 @@ class StartMinecraft(Command):
 
     def run_instance(self, instance_id):
 
-        ec2 = EC2(instance_id)
+        ec2 = EC2Instance(instance_id)
 
         if ec2.check_is_running():
             return
@@ -53,7 +53,7 @@ class StopMinecraft(Command):
     async def action(self):
 
         minecraft_instance = os.getenv('MINECRAFT_SERVER')
-        ec2 = EC2(minecraft_instance)
+        ec2 = EC2Instance(minecraft_instance)
         ec2.stop_instance()
 
         await self.channel_response.send('Minecraft server is Stopped!')

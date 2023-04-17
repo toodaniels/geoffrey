@@ -1,0 +1,21 @@
+version: "3.7"
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    ports:
+     - 32400:32400
+     - 33400:33400
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - VERSION=docker
+      - PLEX_CLAIM=${PLEX_CLAIM}
+    env_file:
+      - ${GEOFFREY_HOME}/.env
+    volumes:
+      - ./config:/config
+      - ./tv:/tv
+      - ./movies:/movies
+    restart: unless-stopped

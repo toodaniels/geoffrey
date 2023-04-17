@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  ispyagentdvr:
+    image: doitandbedone/ispyagentdvr
+    ports:
+      - 8090:8090
+      - 3478:3478/udp
+      - 50000-50010:50000-50010/udp
+    volumes:
+      - ./config/:/agent/Media/XML/
+      - ./media/:/agent/Media/WebServerRoot/Media/
+      - ./commands:/agent/Commands/

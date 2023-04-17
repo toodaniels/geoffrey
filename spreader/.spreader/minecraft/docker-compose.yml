@@ -1,0 +1,18 @@
+---
+version: '3'
+
+services:
+    minecraft:
+        image: itzg/minecraft-bedrock-server
+        environment:
+            EULA: "true"
+            VERSION: 1.19.22.01
+            ONLINE_MODE: "false"
+            GAMEMODE: "survival"
+        restart: always
+        tty: true
+        stdin_open: true
+        volumes:
+            - ./data:/data
+        ports:
+            - "19132:19132/udp"

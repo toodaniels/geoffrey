@@ -1,0 +1,23 @@
+dashy:
+  type: local
+  folder: dashy
+
+transmission:
+  type: local
+  folder: transmission
+
+minecraft:
+  type: local
+  folder: minecraft
+
+wireguard-pihole:
+  type: local
+  folder: wireguard-pihole
+
+telegraf-rocm:
+  type: remote
+  host: https://github.com/toodaniels/telegraf-rocm.git
+
+ispy:
+  type: local
+  folder: ispy

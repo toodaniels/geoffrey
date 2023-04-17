@@ -1,0 +1,23 @@
+pageInfo:
+  title: Geoffrey
+sections: # An array of sections
+  - name: Entretenimiento
+    icon: fa-rocket
+    items:
+      - title: Plex
+        hotkey: 1
+        icon: favicon
+        description: Media library
+        url: http://geoffrey.bot:32400
+        tags: [movies, videos, music]
+  - name: Monitoreo
+    icon: fa-gauge
+    items:
+      - title: Pihole
+        icon: fa-gauge
+        hotkey: 2
+        url: http://geoffrey.bot/admin
+      - title: ispy
+        icon: fa-gauge
+        hotkey: 3
+        url: http://geoffrey.bot:8090%

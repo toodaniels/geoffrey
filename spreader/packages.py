@@ -2,28 +2,30 @@ import os
 import yaml
 from yaml.loader import SafeLoader
 
-SPREADER_FOLDER = '.spreader/'
+GEOFFREY_HOME = os.getenv('GEOFFREY_HOME')
+SPREADER_FOLDER = GEOFFREY_HOME + 'spreader/'
+SPREADER_FOLDER_PACKAGES = SPREADER_FOLDER + '.spreader/'
 
 
 def download_remote_package(package):
-    os.system(f'mkdir {SPREADER_FOLDER}')
+    os.system(f'mkdir {SPREADER_FOLDER_PACKAGES}')
     os.system(
-        f'cd {SPREADER_FOLDER} && git clone {package["host"]}')
-    return package.copy() | {"folder": f'{SPREADER_FOLDER}{package["name"]}'}
+        f'cd {SPREADER_FOLDER_PACKAGES} && git clone {package["host"]}')
+    return package.copy() | {"folder": f'{SPREADER_FOLDER_PACKAGES}{package["name"]}'}
 
 
 def up(package):
     os.system(
-        f'cd {SPREADER_FOLDER}{package["name"]}/ && docker compose up -d')
+        f'cd {SPREADER_FOLDER_PACKAGES}{package["name"]}/ && docker compose up -d')
 
 
 def down(package):
     os.system(
-        f'cd {SPREADER_FOLDER}{package["name"]}/ && docker compose down')
+        f'cd {SPREADER_FOLDER_PACKAGES}{package["name"]}/ && docker compose down')
 
 
 def get_packages():
-    file_yaml = open('packages.yml')
+    file_yaml = open(f'{SPREADER_FOLDER}packages.yml')
     return yaml.load(file_yaml, Loader=SafeLoader)
 
 

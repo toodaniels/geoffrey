@@ -6,7 +6,7 @@ services:
         image: itzg/minecraft-bedrock-server
         environment:
             EULA: "true"
-            VERSION: 1.19.22.01
+            VERSION: 1.19.81.01 
             ONLINE_MODE: "false"
             GAMEMODE: "survival"
         restart: always

@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 from telethon import TelegramClient, events, sync
 
 from dataclasses import dataclass
@@ -13,13 +14,16 @@ if os.getenv('DEVELOPMENT'):
 class TelegramChannelVideoDownloader:
     session: str
     download_path: str
-    API_ID = int(os.getenv('API_ID'))
-    API_HASH = os.getenv('API_HASH')\
+    API_ID: int = int(os.getenv('API_ID', '0'))
+    API_HASH: str = os.getenv('API_HASH', '')
+    BOT_TOKEN: str = os.getenv('TELEGRAM_BOT_TOKEN', '')
 
 
     def __post_init__(self):
         self.client = TelegramClient(
             self.session, self.API_ID, self.API_HASH)
+        self.bot_client = TelegramClient(
+            'geoffrey', self.API_ID, self.API_HASH).start(bot_token=self.BOT_TOKEN)
 
     def download_progress(self, received_bytes, total):
         bar_length = 20
@@ -30,15 +34,47 @@ class TelegramChannelVideoDownloader:
             hashes + spaces, int(round(percent * 100))))
         sys.stdout.flush()
 
-    def download_message_media(self, message):
-        title = message.text.strip()\
-            .replace('\n', ' ').replace(' ', '_').replace('/', '-')
+    def send_status_message(self, message):
+        with self.bot_client as client:
+            client.send_message('toodaniels', message)
+    
+    def define_file_name(self, title):
+        title = title.strip()\
+            .replace('\n', ' ').replace(' ', '_').replace('/', '-')\
+            .replace('YameteKudasaiikuuuuu', '')\
+            .replace('Latino', '') 
+        
+        title = re.sub(r'[^a-zA-Z0-9._-]', '_', title)
+        title = re.sub(r'_+', '_', title)
+        
+        title = title[1:-1] + '.mp4'
 
-        print(f'Downloading {title}')
+
+        # patron = re.compile(r'Temporada_(\d+)_(\d+)-(\d+)_')
+        # coincidencia = patron.search(title)
+
+        # if coincidencia:
+        #     numero_temporada = coincidencia.group(1)
+        #     episodio_inicio = coincidencia.group(2)
+        #     episodio_fin = coincidencia.group(3)
+            
+        #     print(f"Número de Temporada: {numero_temporada}")
+        #     print(f"Episodio Inicio: {episodio_inicio}")
+        #     print(f"Episodio Fin: {episodio_fin}")
+        # else:
+        #     print("El formato del texto no coincide con el esperado.")
+        
+        return title
+
+    def download_message_media(self, message):
+        title = self.define_file_name(message.text)
+        self.send_status_message(f'Downloading {title}')
+        print(f'\nDownloading {title}')
         message.download_media(
             self.download_path + title,
             progress_callback=self.download_progress
         )
+        self.send_status_message(f'Downloaded {title}')
 
     def download_messages(self, chat_id, limit=200, min_id=None):
         with self.client as client:
@@ -59,8 +95,10 @@ def main():
         session='max',
         download_path=os.getenv('DOWNLOAD_PATH'))
 
-    downloader.download_messages(1772208943, limit=2, min_id=81)
+    downloader.download_messages('YameteKudasaiikuuuuu', limit=1, min_id=105208)
 
 
 if __name__ == '__main__':
     main()
+
+ 

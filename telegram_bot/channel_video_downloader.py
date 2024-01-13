@@ -69,13 +69,13 @@ class TelegramChannelVideoDownloader:
 
     def download_message_media(self, message):
         title = self.define_file_name(message.text)
-        #self.send_status_message(f'Downloading {title}')
+        self.send_status_message(f'Downloading {title}')
         print(f'\nDownloading {title}')
         message.download_media(
             self.download_path + title,
             progress_callback=self.download_progress
         )
-        #self.send_status_message(f'Downloaded {title}')
+        self.send_status_message(f'Downloaded {title}')
 
     def download_messages(self, chat_id, limit=200, min_id=None):
         with self.client as client:

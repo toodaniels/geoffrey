@@ -2,6 +2,7 @@ import os
 import sys
 import re
 from telethon import TelegramClient, events, sync
+import textwrap
 
 from dataclasses import dataclass
 
@@ -17,7 +18,7 @@ class TelegramChannelVideoDownloader:
     API_ID: int = int(os.getenv('API_ID', '0'))
     API_HASH: str = os.getenv('API_HASH', '')
     BOT_TOKEN: str = os.getenv('TELEGRAM_BOT_TOKEN', '')
-
+    ID_CHANNEL: str = os.getenv('', '')
 
     def __post_init__(self):
         self.client = TelegramClient(
@@ -68,13 +69,13 @@ class TelegramChannelVideoDownloader:
 
     def download_message_media(self, message):
         title = self.define_file_name(message.text)
-        self.send_status_message(f'Downloading {title}')
+        #self.send_status_message(f'Downloading {title}')
         print(f'\nDownloading {title}')
         message.download_media(
             self.download_path + title,
             progress_callback=self.download_progress
         )
-        self.send_status_message(f'Downloaded {title}')
+        #self.send_status_message(f'Downloaded {title}')
 
     def download_messages(self, chat_id, limit=200, min_id=None):
         with self.client as client:
@@ -88,15 +89,38 @@ class TelegramChannelVideoDownloader:
                 chat_id, ids)
 
             self.download_message_media(message.pop())
+    
+    def search_message_by_text(self, chat_id, text):
+        with self.client as client:
+            messages = client.get_messages(chat_id, search=text, limit=10)
+
+            if len(messages) > 1: 
+                raise ValueError(
+                    f'{len(messages)} matches of messages were found.')
+
+            message = messages.pop()
+            message_id = message.id
+            message_text = textwrap.shorten(
+                message.text, width=30, placeholder="...")
+            
+            print(f'ID Message found: {message_id} with text: {message_text}')
+            return message_id
+
 
 
 def main():
+    chat_id = sys.argv[1]
+    limit = int(sys.argv[2])
+    seach_text = sys.argv[3]
+
     downloader = TelegramChannelVideoDownloader(
         session='max',
         download_path=os.getenv('DOWNLOAD_PATH'))
-
-    downloader.download_messages('YameteKudasaiikuuuuu', limit=1, min_id=105208)
-
+    
+    message_id = downloader.search_message_by_text(
+        chat_id, text=seach_text)
+    
+    downloader.download_messages(chat_id, limit=limit, min_id=message_id)
 
 if __name__ == '__main__':
     main()

@@ -48,27 +48,11 @@ class TelegramChannelVideoDownloader:
         title = re.sub(r'[^a-zA-Z0-9._-]', '_', title)
         title = re.sub(r'_+', '_', title)
         
-        title = title[1:-1] + '.mp4'
-
-
-        # patron = re.compile(r'Temporada_(\d+)_(\d+)-(\d+)_')
-        # coincidencia = patron.search(title)
-
-        # if coincidencia:
-        #     numero_temporada = coincidencia.group(1)
-        #     episodio_inicio = coincidencia.group(2)
-        #     episodio_fin = coincidencia.group(3)
-            
-        #     print(f"Número de Temporada: {numero_temporada}")
-        #     print(f"Episodio Inicio: {episodio_inicio}")
-        #     print(f"Episodio Fin: {episodio_fin}")
-        # else:
-        #     print("El formato del texto no coincide con el esperado.")
-        
         return title
 
     def download_message_media(self, message):
-        title = self.define_file_name(message.text)
+        filename = message.media.document.attributes[0].file_name
+        title = self.define_file_name(filename)
         self.send_status_message(f'Downloading {title}')
         print(f'\nDownloading {title}')
         message.download_media(
@@ -94,7 +78,7 @@ class TelegramChannelVideoDownloader:
         with self.client as client:
             messages = client.get_messages(chat_id, search=text, limit=10)
 
-            if len(messages) > 1: 
+            if len(messages) > 1 or len(messages) == 0: 
                 raise ValueError(
                     f'{len(messages)} matches of messages were found.')
 
@@ -102,10 +86,19 @@ class TelegramChannelVideoDownloader:
             message_id = message.id
             message_text = textwrap.shorten(
                 message.text, width=30, placeholder="...")
-            
+        
             print(f'ID Message found: {message_id} with text: {message_text}')
             return message_id
+    
+    def get_dialogs(self, title):
+        with self.client as client:
+            dialogs = client.get_dialogs()
 
+            for dialog in dialogs:
+                # if dialog.title == 'La teoría del big bang':
+                if dialog.is_channel \
+                    and dialog.title == title:
+                    return dialog.entity
 
 
 def main():
@@ -116,11 +109,12 @@ def main():
     downloader = TelegramChannelVideoDownloader(
         session='max',
         download_path=os.getenv('DOWNLOAD_PATH'))
+
+    entity = downloader.get_dialogs(chat_id)
     
-    message_id = downloader.search_message_by_text(
-        chat_id, text=seach_text)
+    message_id = downloader.search_message_by_text(entity, text=seach_text)
     
-    downloader.download_messages(chat_id, limit=limit, min_id=message_id)
+    downloader.download_messages(entity, limit=limit, min_id=message_id)
 
 if __name__ == '__main__':
     main()

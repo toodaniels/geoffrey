@@ -38,42 +38,44 @@ class TelegramChannelVideoDownloader:
     def send_status_message(self, message):
         with self.bot_client as client:
             client.send_message('toodaniels', message)
-    
+
     def define_file_name(self, title):
         title = title.strip()\
             .replace('\n', ' ').replace(' ', '_').replace('/', '-')\
             .replace('YameteKudasaiikuuuuu', '')\
             .replace('Latino', '') 
-        
         title = re.sub(r'[^a-zA-Z0-9._-]', '_', title)
         title = re.sub(r'_+', '_', title)
-        
         return title
 
     def download_message_media(self, message):
         filename = message.media.document.attributes[0].file_name
         title = self.define_file_name(filename)
-        self.send_status_message(f'Downloading {title}')
-        print(f'\nDownloading {title}')
-        message.download_media(
-            self.download_path + title,
-            progress_callback=self.download_progress
-        )
+        self.send_status_message(f'Downloading {title} chat_id {message.id}')
+        print(f'\nDownloading {title} chat_id {message.id}')
+        try:
+            message.download_media(
+                self.download_path + title,
+                progress_callback=self.download_progress
+            )
+        except Exception as e:
+            self.send_status_message(f'Fail Downloading {title} error: {str(e)}')
         self.send_status_message(f'Downloaded {title}')
 
     def download_messages(self, chat_id, limit=200, min_id=None):
         with self.client as client:
             messages = client.get_messages(
                 chat_id, limit=limit, min_id=min_id, reverse=True)
-            list(map(self.download_message_media, messages))
+            messages_ids = list(map(lambda message: message.id, messages))
+            for message_id in messages_ids:
+                self.download_message(chat_id, message_id)
 
-    def download_message(self, chat_id, ids):
+    def download_message(self, chat_id, message_id):
         with self.client as client:
             message = client.get_messages(
-                chat_id, ids)
+                chat_id, limit=1, ids=message_id)
+            self.download_message_media(message)
 
-            self.download_message_media(message.pop())
-    
     def search_message_by_text(self, chat_id, text):
         with self.client as client:
             messages = client.get_messages(chat_id, search=text, limit=10)
@@ -81,21 +83,19 @@ class TelegramChannelVideoDownloader:
             if len(messages) > 1 or len(messages) == 0: 
                 raise ValueError(
                     f'{len(messages)} matches of messages were found.')
-
             message = messages.pop()
             message_id = message.id
             message_text = textwrap.shorten(
                 message.text, width=30, placeholder="...")
-        
+
             print(f'ID Message found: {message_id} with text: {message_text}')
             return message_id
-    
+
     def get_dialogs(self, title):
         with self.client as client:
             dialogs = client.get_dialogs()
 
             for dialog in dialogs:
-                # if dialog.title == 'La teoría del big bang':
                 if dialog.is_channel \
                     and dialog.title == title:
                     return dialog.entity
@@ -111,12 +111,8 @@ def main():
         download_path=os.getenv('DOWNLOAD_PATH'))
 
     entity = downloader.get_dialogs(chat_id)
-    
     message_id = downloader.search_message_by_text(entity, text=seach_text)
-    
     downloader.download_messages(entity, limit=limit, min_id=message_id)
 
 if __name__ == '__main__':
     main()
-
- 
